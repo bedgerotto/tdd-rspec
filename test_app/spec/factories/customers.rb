@@ -2,10 +2,12 @@ FactoryBot.define do
   factory :customer, aliases: [:user] do
     transient do
       upcased { false }
+      quantity_orders { 3 }
     end
 
     name { Faker::Name.name }
-    email { Faker::Internet.email }
+    # email { Faker::Internet.email }
+    sequence(:email) { |n| "meu_email-#{n}@email.com" }
 
     trait :vip do
       vip { true }
@@ -23,6 +25,12 @@ FactoryBot.define do
 
     trait :female do
       gender { 'F' }
+    end
+
+    trait :with_orders do
+      after(:create) do |customer, evaluator|
+        create_list(:order, evaluator.quantity_orders, customer: customer)
+      end
     end
 
     factory :customer_male, traits: [:male]
