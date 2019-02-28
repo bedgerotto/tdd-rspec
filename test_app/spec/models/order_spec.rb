@@ -12,6 +12,12 @@ RSpec.describe Order, type: :model do
     expect(orders.count).to eq(3)
   end
 
+  it 'Tem 2 pedidos - create_list' do
+    orders = create_pair(:order)
+
+    expect(orders.count).to eq(2)
+  end
+
   it 'has_many' do
     customer = create(:customer, :with_orders, quantity_orders: 5)
     expect(customer.orders.count).to eq(5)
