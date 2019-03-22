@@ -12,7 +12,9 @@ RSpec.describe "Customers", type: :request do
       expect(response).to have_http_status(200)
       expect(response.body).to include_json(
         [
-          id: 1
+          id: /\d/,
+          name: (be_kind_of String),
+          email: (be_kind_of String)
         ]
       )
     end
@@ -21,7 +23,25 @@ RSpec.describe "Customers", type: :request do
       get '/customers/1.json'
       expect(response).to have_http_status(200)
       expect(response.body).to include_json(
-        id: 1
+        id: /\d/,
+        name: (be_kind_of String),
+        email: (be_kind_of String)
+      )
+    end
+
+    it 'Create - JSON' do
+      member = create(:member)
+      login_as(member, scope: :member)
+
+      headers = { 'ACCEPT' => 'application/json' }
+
+      customer_params = attributes_for :customer
+
+      post '/customers', params: { customer: customer_params}, headers: headers
+      expect(response.body).to include_json(
+        id: /\d/,
+        name: customer_params[:name],
+        email: customer_params[:email]
       )
     end
   end
