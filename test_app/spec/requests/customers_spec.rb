@@ -7,6 +7,12 @@ RSpec.describe "Customers", type: :request do
       expect(response).to have_http_status(200)
     end
 
+    it 'JSON schema' do
+      get '/customers/1.json'
+
+      expect(response).to match_response_schema('customer')
+    end
+
     it "Index - JSON 200 OK" do
       get '/customers.json'
       expect(response).to have_http_status(200)
@@ -27,6 +33,15 @@ RSpec.describe "Customers", type: :request do
         name: (be_kind_of String),
         email: (be_kind_of String)
       )
+    end
+
+    it "Show - JSON 200 OK" do
+      get '/customers/1.json'
+      response_body = JSON.parse(response.body)
+
+      expect(response_body.fetch('id')).to eq(1)
+      expect(response_body.fetch('name')).to be_kind_of(String)
+      expect(response_body.fetch('email')).to be_kind_of(String)
     end
 
     it 'Create - JSON' do
@@ -60,6 +75,19 @@ RSpec.describe "Customers", type: :request do
         name: customer.name,
         email: customer.email
       )
+    end
+
+    it 'Destroy - JSON' do
+      member = create(:member)
+      login_as(member, scope: :member)
+
+      headers = { 'ACCEPT' => 'application/json' }
+
+      customer = Customer.first
+      customer.name += ' - Atualizado'
+
+      expect{ delete "/customers/#{customer.id}.json", headers: headers }.to change(Customer, :count).by(-1)
+      expect(response).to have_http_status(204)
     end
   end
 end
